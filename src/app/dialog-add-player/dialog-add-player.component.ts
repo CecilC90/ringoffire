@@ -4,6 +4,8 @@ import {
   MatDialogContent,
   MatDialogActions,
   MatDialogClose,
+  MatDialog,
+  MatDialogRef,
 } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
@@ -29,8 +31,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 export class DialogAddPlayerComponent {
   name: string = '';
 
+  constructor (public dialogRef: MatDialogRef<DialogAddPlayerComponent>,) {
+
+  }
+
   onNoClick() {
-    
+    this.dialogRef.close();
   }
 
 }
