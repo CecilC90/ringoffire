@@ -36,7 +36,7 @@ export class GameComponent {
   }
 
   ngOnInit(): void {
-    this.newGame();
+    this.newNewGame();
     onSnapshot(this.getGameRef(), (game) => {
       game.forEach(element => {
         console.log("Game update:", element.data());
@@ -54,20 +54,10 @@ export class GameComponent {
     return doc(collection(this.firestore, colId), docId)
   }
 
-  setGameObject(obj: any, id:string): Game {
-    return {
-      players: obj.players,          //only array with strings
-      stack: obj.stack,
-      playedCards: obj.playedCards,
-      currentPlayer: obj.currentPlayer,
-    }
-  }
-
-
-  newGame() {
+  newNewGame() {
     this.game = new Game();
     //this.addNewGame(this.game,'games');
-    this.addGame({'Hallo': 'Welt'});
+    this.addGame(this.game.toJson());
     
   }
 
@@ -76,18 +66,7 @@ export class GameComponent {
   };
 
 
-  /*
-  async addNewGame(game: Game, colId: "games") {
-    const gameData = {
-      // Extrahiere die Eigenschaften des Game-Objekts und füge sie dem neuen Objekt hinzu
-      currentPlayer: this.game.currentPlayer,
-      players: this.game.players,
-      stack: this.game.stack,
-      playedCards: this.game.playedCards
-      // Fügen Sie weitere Eigenschaften hinzu, wenn nötig
-    };
-    await addDoc(collection(this.firestore, colId), gameData);
-  }*/
+  
  
   takeCard() {
     if (!this.pickCardAnimation) {

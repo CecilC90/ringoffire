@@ -13,7 +13,6 @@ export class StartScreenComponent {
   constructor(private router: Router) {
 
   }
-
   newGame() {
     // Start Game
     this.router.navigateByUrl('/game');
