@@ -36,10 +36,11 @@ export class GameComponent {
   }
 
   ngOnInit(): void {
-    this.newNewGame();
+    debugger;
+    this.getNewGame();
     onSnapshot(this.getGameRef(), (game) => {
       game.forEach(element => {
-        console.log("Game update:", element.data());
+        console.log("Game update:", element.id);
         //console.log("Game update:", this.setGameObject(element.data(), element.id));
       })
     });
@@ -54,11 +55,10 @@ export class GameComponent {
     return doc(collection(this.firestore, colId), docId)
   }
 
-  newNewGame() {
+  getNewGame() {
+    debugger;
     this.game = new Game();
-    //this.addNewGame(this.game,'games');
     this.addGame(this.game.toJson());
-    
   }
 
   async addGame(item: {}) {
