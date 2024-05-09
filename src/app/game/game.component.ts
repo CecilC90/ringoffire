@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Game } from '../../models/game';
 import { PlayerComponent } from '../player/player.component';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,10 +25,12 @@ import { Observable } from 'rxjs';
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss'
 })
-export class GameComponent {
+
+
+export class GameComponent implements OnInit{
   pickCardAnimation = false;
   currentCard: string = '';
-  game: Game = new Game;
+  game!: Game;
   
  firestore: Firestore = inject(Firestore)
 
@@ -36,7 +38,7 @@ export class GameComponent {
   }
 
   ngOnInit(): void {
-    debugger;
+    
     this.getNewGame();
     onSnapshot(this.getGameRef(), (game) => {
       game.forEach(element => {
@@ -56,7 +58,7 @@ export class GameComponent {
   }
 
   getNewGame() {
-    debugger;
+    //debugger;
     this.game = new Game();
     this.addGame(this.game.toJson());
   }
