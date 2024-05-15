@@ -1,24 +1,19 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { GameService } from '../game.service';
+import { Game } from '../../models/game';
 
 @Component({
   selector: 'app-start-screen',
-  standalone: true,
-  imports: [],
   templateUrl: './start-screen.component.html',
-  styleUrl: './start-screen.component.scss'
+  styleUrls: ['./start-screen.component.scss']
 })
 export class StartScreenComponent {
+  game: Game = new Game();
 
-  constructor(private router: Router) {
+  constructor( private gameService: GameService) { }
 
-  }
   newGame() {
-    // Start Game
-    this.router.navigateByUrl('/game');
+    this.gameService.addGame(this.game)
   }
-
-
-  
 }
-

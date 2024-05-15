@@ -9,6 +9,8 @@ import { DialogAddPlayerComponent } from '../dialog-add-player/dialog-add-player
 import { GameInfoComponent } from '../game-info/game-info.component';
 import { Firestore, collection, onSnapshot, addDoc, doc, collectionData } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import { GameService } from '../game.service';
 
 
 
@@ -26,50 +28,68 @@ import { Observable } from 'rxjs';
   styleUrl: './game.component.scss'
 })
 
-
-export class GameComponent implements OnInit{
+export class GameComponent implements OnInit {
   pickCardAnimation = false;
   currentCard: string = '';
   game!: Game;
-  
- firestore: Firestore = inject(Firestore)
+  gameId!: string;
 
-  constructor( public dialog: MatDialog) {    
+  firestore: Firestore = inject(Firestore)
+
+  constructor(private gameService: GameService, private gemeService: GameService, private route: ActivatedRoute, public dialog: MatDialog) {
   }
 
   ngOnInit(): void {
-    
+
     this.getNewGame();
-    onSnapshot(this.getGameRef(), (game) => {
-      game.forEach(element => {
-        console.log("Game update:", element.id);
-        //console.log("Game update:", this.setGameObject(element.data(), element.id));
-      })
-    });
-  }
+    // URL Parameter abonnieren 
+    this.route.params.subscribe((params) => {
+      console.log(params['id']);
+      this.gameId = params['id'];
 
-  getGameRef() {
-    return collection(this.firestore, 'games');
-  }
+      /*      onSnapshot(this.getGameRef(), (game) => {
+              game.forEach(element => {
+                console.log("Game update:", element.data());
+              })
+      */
+      //es wird nur ein Bestimmtes Dokument abonniert!
 
-  getSingleDocRef(colId:string, docId:string) {
-    //doc braucht die Datenbank (this.firestore), id von der Sammlung & id von single Document 
-    return doc(collection(this.firestore, colId), docId)
+      // Eine Abfrage an die Firestore-Datenbank wird gestellt, um ein bestimmtes Dokument abzurufen.
+      // Es wird erwartet, dass das Dokument mit der ID 'gameId' in der Sammlung 'games' vorhanden ist.
+      onSnapshot(this.gameService.getSingleDocRef('games', this.gameId), (gameSnapshot: any) => {
+
+        // Überprüft, ob das abgerufene Dokument existiert.
+        if (gameSnapshot.exists) {
+
+          // Wenn das Dokument existiert, werden seine Daten abgerufen und der Variablen 'game' zugewiesen.
+          // Hier wird 'game.data()' verwendet, um die Daten des Dokuments abzurufen.
+          const game = gameSnapshot.data();
+
+          // Überprüft, ob Daten im 'game'-Objekt vorhanden sind.
+          if (game) {
+
+            // Wenn Daten vorhanden sind, werden die Eigenschaften des 'game'-Objekts auf die entsprechenden Eigenschaften des 'this.game'-Objekts zugewiesen.
+            this.game.currentPlayer = game.currentPlayer;
+            this.game.playedCards = game.playedCards;
+            this.game.players = game.players;
+            this.game.stack = game.stack;
+
+            // Eine Protokollausgabe, um die aktualisierten Spieldaten anzuzeigen.
+            console.log("Game update:", game);
+          }
+        } else {
+          // Protokollausgabe, falls das Dokument nicht existiert.
+          console.log("Document does not exist");
+        }
+      });
+    })
   }
 
   getNewGame() {
-    //debugger;
     this.game = new Game();
-    this.addGame(this.game.toJson());
+
   }
 
-  async addGame(item: {}) {
-    await addDoc(this.getGameRef(), item);
-  };
-
-
-  
- 
   takeCard() {
     if (!this.pickCardAnimation) {
       let nextCard = this.game.stack.pop();
@@ -93,14 +113,12 @@ export class GameComponent implements OnInit{
 
   openDialog(): void {
     const dialogRef = this.dialog.open(DialogAddPlayerComponent, {
-
     });
 
     dialogRef.afterClosed().subscribe((name: string) => {
       if (name && name.length > 0) {
         this.game.players.push(name);
       }
-
     });
   }
 }
