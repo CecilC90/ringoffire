@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogAddPlayerComponent } from '../dialog-add-player/dialog-add-player.component';
 import { GameInfoComponent } from '../game-info/game-info.component';
-import { Firestore, collection, onSnapshot, addDoc, doc, collectionData } from '@angular/fire/firestore';
+import { Firestore, collection, onSnapshot, addDoc, doc, collectionData, updateDoc } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { GameService } from '../game.service';
@@ -29,8 +29,7 @@ import { GameService } from '../game.service';
 })
 
 export class GameComponent implements OnInit {
-  pickCardAnimation = false;
-  currentCard: string = '';
+  
   game!: Game;
   gameId!: string;
 
@@ -73,6 +72,8 @@ export class GameComponent implements OnInit {
             this.game.playedCards = game.playedCards;
             this.game.players = game.players;
             this.game.stack = game.stack;
+            this.game.pickCardAnimation = game.pickCardAnimation;
+            this.game.currentCard = game.currentCard;
 
             // Eine Protokollausgabe, um die aktualisierten Spieldaten anzuzeigen.
             console.log("Game update:", game);
@@ -91,22 +92,24 @@ export class GameComponent implements OnInit {
   }
 
   takeCard() {
-    if (!this.pickCardAnimation) {
+    if (!this.game.pickCardAnimation) {
       let nextCard = this.game.stack.pop();
+
       if (nextCard != undefined) {
-        this.currentCard = nextCard;
+        this.game.currentCard = nextCard;
       }
 
-      this.pickCardAnimation = true;
-
-      console.log('New card: ' + this.currentCard);
+      this.game.pickCardAnimation = true;
+      console.log('New card: ' + this.game.currentCard);
       console.log('Game is', this.game);
-
       this.game.currentPlayer++;
       this.game.currentPlayer = this.game.currentPlayer % this.game.players.length;
+
+      this.saveGame();
       setTimeout(() => {
-        this.game.playedCards.push(this.currentCard);
-        this.pickCardAnimation = false;
+        this.game.playedCards.push(this.game.currentCard);
+        this.game.pickCardAnimation = false;
+        this.saveGame();
       }, 1000);
     }
   }
@@ -118,9 +121,15 @@ export class GameComponent implements OnInit {
     dialogRef.afterClosed().subscribe((name: string) => {
       if (name && name.length > 0) {
         this.game.players.push(name);
+        this.saveGame();
       }
     });
   }
+
+  async saveGame() {
+    await updateDoc(this.gameService.getSingleDocRef('games', this.gameId), this.game.toJson())
+  }
+
 }
 
 
