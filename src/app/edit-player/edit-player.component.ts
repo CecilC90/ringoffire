@@ -13,7 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 
 @Component({
-  selector: 'app-dialog-add-player',
+  selector: 'app-edit-player',
   standalone: true,
   imports: [
     MatInputModule,
@@ -25,18 +25,19 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MatDialogActions,
     MatDialogClose,
   ],
-  templateUrl: './dialog-add-player.component.html',
-  styleUrl: './dialog-add-player.component.scss'
+  templateUrl: './edit-player.component.html',
+  styleUrl: './edit-player.component.scss'
 })
-export class DialogAddPlayerComponent {
-  name: string = '';
+export class EditPlayerComponent {
 
-  constructor (public dialogRef: MatDialogRef<DialogAddPlayerComponent>) {
+allProfilePictures = ['1.webp', '2.png', '3.png', '4.png', '5.jpg', '6.jpg', '7.png', '8.png'];
 
-  }
+constructor(public dialogRef: MatDialogRef<EditPlayerComponent>) {
+  
+}
 
-  onNoClick() {
-    this.dialogRef.close();
-  }
+selectPicture(picture:string) {
+
+}
 
 }

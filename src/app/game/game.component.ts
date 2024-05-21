@@ -11,6 +11,8 @@ import { Firestore, collection, onSnapshot, addDoc, doc, collectionData, updateD
 import { Observable } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { GameService } from '../game.service';
+import { PlayerMobileComponent } from '../player-mobile/player-mobile.component';
+import { EditPlayerComponent } from '../edit-player/edit-player.component';
 
 
 
@@ -22,6 +24,7 @@ import { GameService } from '../game.service';
     MatButtonModule,
     MatIconModule,
     GameInfoComponent,
+    PlayerMobileComponent
   ],
 
   templateUrl: './game.component.html',
@@ -29,9 +32,10 @@ import { GameService } from '../game.service';
 })
 
 export class GameComponent implements OnInit {
-  
+
   game!: Game;
   gameId!: string;
+  gameOver = false;
 
   firestore: Firestore = inject(Firestore)
 
@@ -71,6 +75,7 @@ export class GameComponent implements OnInit {
             this.game.currentPlayer = game.currentPlayer;
             this.game.playedCards = game.playedCards;
             this.game.players = game.players;
+            this.game.player_images = game.player_images;
             this.game.stack = game.stack;
             this.game.pickCardAnimation = game.pickCardAnimation;
             this.game.currentCard = game.currentCard;
@@ -92,7 +97,9 @@ export class GameComponent implements OnInit {
   }
 
   takeCard() {
-    if (!this.game.pickCardAnimation) {
+    if(this.game.stack.length == 0) {
+      this.gameOver = true;
+    } else if (!this.game.pickCardAnimation) {
       let nextCard = this.game.stack.pop();
 
       if (nextCard != undefined) {
@@ -121,6 +128,7 @@ export class GameComponent implements OnInit {
     dialogRef.afterClosed().subscribe((name: string) => {
       if (name && name.length > 0) {
         this.game.players.push(name);
+        this.game.player_images.push('1.webp');
         this.saveGame();
       }
     });
@@ -128,6 +136,26 @@ export class GameComponent implements OnInit {
 
   async saveGame() {
     await updateDoc(this.gameService.getSingleDocRef('games', this.gameId), this.game.toJson())
+  }
+
+  editPlayer(playerId: number) {
+    console.log('Edit Player', playerId);
+
+    const dialogRef = this.dialog.open(EditPlayerComponent);
+
+    dialogRef.afterClosed().subscribe((change: string) => {
+      if (change) {
+        if(change == 'DELETE') {
+          this.game.player_images.splice(playerId, 1);
+          this.game.players.splice(playerId, 1);
+        } else {
+          console.log('Received change', change);
+          this.game.player_images[playerId] = change;
+          
+        }
+        this.saveGame();
+      }
+    });
   }
 
 }
